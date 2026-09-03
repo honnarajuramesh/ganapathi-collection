@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { friendlyError } from '../utils/errors';
 import toast from 'react-hot-toast';
 
 const paymentStyles = {
@@ -117,7 +118,7 @@ function IncomeTab() {
       setEditingEntry(null);
       setEditForm({});
     } catch (error) {
-      toast.error('Failed to update entry');
+      toast.error(friendlyError(error, 'Failed to update entry'));
     }
   }
 
@@ -127,7 +128,7 @@ function IncomeTab() {
         await deleteCollection(id);
         toast.success('Entry deleted');
       } catch (error) {
-        toast.error('Failed to delete entry');
+        toast.error(friendlyError(error, 'Failed to delete entry'));
       }
     }
   }
@@ -315,7 +316,7 @@ function ExpenseTab() {
       setEditingEntry(null);
       setEditForm({});
     } catch (error) {
-      toast.error('Failed to update expense');
+      toast.error(friendlyError(error, 'Failed to update expense'));
     }
   }
 
@@ -325,7 +326,7 @@ function ExpenseTab() {
         await deleteExpense(id);
         toast.success('Expense deleted');
       } catch (error) {
-        toast.error('Failed to delete expense');
+        toast.error(friendlyError(error, 'Failed to delete expense'));
       }
     }
   }
@@ -485,7 +486,7 @@ function TransferTab() {
         await deleteTransfer(id);
         toast.success('Transfer deleted');
       } catch (error) {
-        toast.error('Failed to delete transfer');
+        toast.error(friendlyError(error, 'Failed to delete transfer'));
       }
     }
   }
