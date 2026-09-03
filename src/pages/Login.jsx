@@ -40,7 +40,7 @@ export default function Login({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+    <div className="min-h-dvh relative flex items-center justify-center overflow-hidden py-8">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img src="/bg-ganesh.png" alt="" className="w-full h-full object-cover object-center scale-105" />
