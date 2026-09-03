@@ -2,14 +2,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Users collection - anyone can read, only authenticated server-side writes
+    // Users collection - anyone can read/write (PIN auth handled in app,
+    // this app never uses Firebase Auth so request.auth is always null)
     match /users/{userId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
     }
-    
+
     // Collections collection - anyone can read/write (PIN auth handled in app)
     match /collections/{collectionId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // Expenses collection - money spent by a collector/manager
+    match /expenses/{expenseId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // Transfers collection - cash handed from one collector to another
+    match /transfers/{transferId} {
       allow read: if true;
       allow create: if true;
       allow update: if true;
