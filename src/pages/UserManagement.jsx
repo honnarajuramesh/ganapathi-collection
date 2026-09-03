@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { friendlyError } from '../utils/errors';
 import toast from 'react-hot-toast';
 
 const formatINR = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
@@ -30,7 +31,7 @@ export default function UserManagement() {
       toast.success(`${form.name.trim()} added ✨`);
       setShowAddForm(false);
     } catch (error) {
-      toast.error(error.message || 'Failed to add collector');
+      toast.error(friendlyError(error, 'Failed to add collector'));
     }
     setSaving(false);
   }

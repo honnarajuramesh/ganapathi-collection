@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { PAYMENT_METHODS, EXPENSE_CATEGORIES } from '../utils/constants';
+import { friendlyError } from '../utils/errors';
 import toast from 'react-hot-toast';
 
 const methodIcons = {
@@ -111,7 +112,7 @@ function IncomeForm({ onNavigate }) {
       setTimeout(() => onNavigate('collections'), 1200);
     } catch (error) {
       console.error('Error adding entry:', error);
-      toast.error('Failed to add entry');
+      toast.error(friendlyError(error, 'Failed to add entry'));
     }
     setLoading(false);
   }
@@ -258,7 +259,7 @@ function ExpenseForm({ onNavigate }) {
       setTimeout(() => onNavigate('collections'), 1200);
     } catch (error) {
       console.error('Error adding expense:', error);
-      toast.error('Failed to record expense');
+      toast.error(friendlyError(error, 'Failed to record expense'));
     }
     setLoading(false);
   }
@@ -425,7 +426,7 @@ function TransferForm({ onNavigate }) {
       setTimeout(() => onNavigate('collections'), 1200);
     } catch (error) {
       console.error('Error transferring funds:', error);
-      toast.error('Failed to transfer');
+      toast.error(friendlyError(error, 'Failed to transfer'));
     }
     setLoading(false);
   }
