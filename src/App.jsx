@@ -27,7 +27,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-dvh flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -38,7 +38,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen pb-32 bg-[radial-gradient(ellipse_at_top_right,rgba(255,215,0,0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(255,94,98,0.06),transparent_50%)]">
+    <div className="min-h-dvh pb-40 bg-[radial-gradient(ellipse_at_top_right,rgba(255,215,0,0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(255,94,98,0.06),transparent_50%)]">
       <Header activePage={activePage} onNavigate={setActivePage} />
       
       <main className="max-w-lg mx-auto">

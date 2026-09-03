@@ -54,27 +54,29 @@ export default function Header({ activePage, onNavigate }) {
       </header>
 
       {/* Floating Dock Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 safe-bottom pointer-events-none">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 px-3 safe-bottom pointer-events-none">
         <div className="max-w-lg mx-auto">
-          <div className="glass rounded-full p-2 shadow-2xl border border-white/40 pointer-events-auto">
+          <div className="glass rounded-[28px] p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.16)] border border-white/50 pointer-events-auto">
             <div className="flex">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`relative flex-1 flex items-center justify-center py-3.5 transition-all duration-300 ${
+                  aria-label={item.label}
+                  aria-current={activePage === item.id ? 'page' : undefined}
+                  className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[56px] rounded-[22px] transition-all duration-300 active:scale-95 ${
                     activePage === item.id
-                      ? 'text-orange-600 scale-105'
+                      ? 'text-orange-600'
                       : 'text-gray-400 hover:text-gray-600'
                   }`}
                 >
                   {activePage === item.id && (
-                    <span className="absolute inset-x-4 inset-y-0.5 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full -z-10 pop"></span>
+                    <span className="absolute inset-0.5 bg-gradient-to-br from-orange-100 to-amber-100 rounded-[20px] -z-10 pop"></span>
                   )}
-                  <span className={`text-xl transition-transform duration-300 ${activePage === item.id ? '-translate-y-0.5' : ''}`}>
+                  <span className={`text-xl leading-none transition-transform duration-300 ${activePage === item.id ? '-translate-y-0.5 scale-110' : ''}`}>
                     {item.icon}
                   </span>
-                  <span className={`text-[9px] font-bold mt-1 absolute bottom-0.5 transition-opacity ${activePage === item.id ? 'opacity-100 text-orange-600' : 'opacity-0'}`}>
+                  <span className={`text-[10px] font-bold leading-none transition-all duration-300 ${activePage === item.id ? 'text-orange-600' : 'text-gray-400'}`}>
                     {item.label}
                   </span>
                 </button>
