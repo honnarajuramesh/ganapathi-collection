@@ -13,3 +13,12 @@ export const PAYMENT_METHODS = [
   { value: 'paytm', label: 'Paytm' },
   { value: 'other', label: 'Other UPI' },
 ];
+
+export const EXPENSE_CATEGORIES = [
+  { value: 'prasada', label: 'Prasada Items', icon: '🍬' },
+  { value: 'decoration', label: 'Decoration', icon: '🎊' },
+  { value: 'priest', label: 'Priest Dakshina', icon: '🙏' },
+  { value: 'transport', label: 'Transport', icon: '🚗' },
+  { value: 'electricity', label: 'Electricity & Sound', icon: '💡' },
+  { value: 'other', label: 'Other', icon: '📦' },
+];

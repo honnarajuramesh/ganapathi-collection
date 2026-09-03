@@ -11,11 +11,17 @@ import { Toaster } from 'react-hot-toast';
 function AppContent() {
   const { currentUser, loading, initializeUsers } = useAuth();
   const [activePage, setActivePage] = useState('dashboard');
+  const [entryMode, setEntryMode] = useState('income');
   const [showLogin, setShowLogin] = useState(true);
 
   useEffect(() => {
-    initializeUsers();
+    initializeUsers().catch((err) => console.warn('Could not seed default users:', err.message));
   }, []);
+
+  function handleNavigate(page, mode) {
+    if (page === 'entry' && mode) setEntryMode(mode);
+    setActivePage(page);
+  }
 
   useEffect(() => {
     if (currentUser) {
@@ -39,11 +45,11 @@ function AppContent() {
 
   return (
     <div className="min-h-dvh pb-40 bg-[radial-gradient(ellipse_at_top_right,rgba(255,215,0,0.08),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(255,94,98,0.06),transparent_50%)]">
-      <Header activePage={activePage} onNavigate={setActivePage} />
-      
+      <Header activePage={activePage} onNavigate={handleNavigate} />
+
       <main className="max-w-lg mx-auto">
-        {activePage === 'dashboard' && <Dashboard />}
-        {activePage === 'entry' && <EntryForm onNavigate={setActivePage} />}
+        {activePage === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
+        {activePage === 'entry' && <EntryForm onNavigate={handleNavigate} initialMode={entryMode} />}
         {activePage === 'collections' && <Collections />}
         {activePage === 'users' && <UserManagement />}
       </main>

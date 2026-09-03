@@ -10,6 +10,11 @@ const paymentStyles = {
 
 const formatINR = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
 
+function toMillis(ts) {
+  if (!ts) return 0;
+  return ts.seconds ? ts.seconds * 1000 : new Date(ts).getTime();
+}
+
 function StatCard({ icon, label, value, sub, gradient, delay }) {
   return (
     <div className="glass-card rounded-3xl p-5 card-3d fade-up" style={{ animationDelay: `${delay}ms` }}>
@@ -27,25 +32,58 @@ function StatCard({ icon, label, value, sub, gradient, delay }) {
   );
 }
 
-export default function Dashboard() {
-  const { currentUser, collections, getTotalCollections, getUserCollections } = useAuth();
+function QuickAction({ icon, label, gradient, onClick, delay }) {
+  return (
+    <button
+      onClick={onClick}
+      className="glass-card rounded-2xl p-3.5 flex flex-col items-center gap-2 card-3d fade-up"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className={`w-10 h-10 ${gradient} rounded-xl flex items-center justify-center shadow-md`}>
+        <span className="text-lg">{icon}</span>
+      </div>
+      <span className="text-xs font-bold text-gray-700">{label}</span>
+    </button>
+  );
+}
+
+export default function Dashboard({ onNavigate }) {
+  const {
+    currentUser, collections, expenses, transfers,
+    getTotalCollections, getUserCollections,
+    getTotalExpenses, getUserExpenses,
+    getUserTransfersIn, getUserTransfersOut, getUserBalance,
+  } = useAuth();
 
   const totalAmount = getTotalCollections();
   const myAmount = getUserCollections(currentUser?.id);
   const totalEntries = collections.length;
+
+  const myExpenses = getUserExpenses(currentUser?.id);
+  const totalExpenses = getTotalExpenses();
+  const myTransfersIn = getUserTransfersIn(currentUser?.id);
+  const myTransfersOut = getUserTransfersOut(currentUser?.id);
+  const myBalance = getUserBalance(currentUser?.id);
 
   const todayISO = new Date().toISOString().split('T')[0];
   const todayEntries = collections.filter(c => c.date === todayISO);
   const todayAmount = todayEntries.reduce((s, c) => s + (Number(c.amount) || 0), 0);
   const myEntries = collections.filter(c => c.createdBy === currentUser?.id).length;
 
-  const recentEntries = [...collections]
-    .sort((a, b) => {
-      const ta = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : new Date(a.createdAt || 0);
-      const tb = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : new Date(b.createdAt || 0);
-      return tb - ta;
-    })
-    .slice(0, 6);
+  const activity = [
+    ...collections.map(c => ({
+      type: 'income', id: `c-${c.id}`, title: c.name, sub: c.collectorName,
+      amount: c.amount, ts: toMillis(c.createdAt), method: c.paymentMethod,
+    })),
+    ...expenses.map(e => ({
+      type: 'expense', id: `e-${e.id}`, title: e.purpose, sub: e.collectorName,
+      amount: e.amount, ts: toMillis(e.capturedAt),
+    })),
+    ...transfers.map(t => ({
+      type: 'transfer', id: `t-${t.id}`, title: `${t.fromUserName} → ${t.toUserName}`, sub: t.reason,
+      amount: t.amount, ts: toMillis(t.createdAt),
+    })),
+  ].sort((a, b) => b.ts - a.ts).slice(0, 6);
 
   const weekData = collections.reduce((acc, c) => {
     const d = c.date?.slice(5);
@@ -80,6 +118,13 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-3 gap-2.5">
+        <QuickAction icon="➕" label="Income" gradient="gradient-primary" onClick={() => onNavigate?.('entry', 'income')} delay={30} />
+        <QuickAction icon="🧾" label="Expense" gradient="gradient-rose" onClick={() => onNavigate?.('entry', 'expense')} delay={60} />
+        <QuickAction icon="🔄" label="Transfer" gradient="gradient-royal" onClick={() => onNavigate?.('entry', 'transfer')} delay={90} />
       </div>
 
       {/* Hero Card */}
@@ -117,6 +162,26 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Amount With Me */}
+      <div className="gradient-emerald rounded-[32px] p-6 text-white relative overflow-hidden shadow-2xl shadow-emerald-500/25 tilt-in" style={{ animationDelay: '80ms' }}>
+        <div className="absolute -top-14 -right-14 w-48 h-48 bg-white/10 rounded-full blur-sm"></div>
+        <div className="relative">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-white/85 text-sm font-medium tracking-wide">💼 AMOUNT WITH ME</p>
+            <span className="text-2xl float">🪙</span>
+          </div>
+          <p className="text-4xl font-extrabold mt-1 tracking-tight drop-shadow-md" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
+            {formatINR(myBalance)}
+          </p>
+          <p className="text-xs text-white/70 mt-2">
+            {formatINR(myAmount)} collected
+            {myTransfersIn > 0 && ` + ${formatINR(myTransfersIn)} received`}
+            {myTransfersOut > 0 && ` − ${formatINR(myTransfersOut)} sent`}
+            {myExpenses > 0 && ` − ${formatINR(myExpenses)} spent`}
+          </p>
+        </div>
+      </div>
+
       {/* My Stats */}
       <div className="grid grid-cols-2 gap-3">
         <StatCard
@@ -127,12 +192,27 @@ export default function Dashboard() {
           delay={100}
         />
         <StatCard
+          icon="🧾"
+          label="My Expenses"
+          value={formatINR(myExpenses)}
+          gradient="bg-gradient-to-br from-rose-400 to-red-500"
+          delay={150}
+        />
+        <StatCard
           icon="📈"
           label="My Performance"
           value={`${totalEntries ? ((myEntries / totalEntries) * 100).toFixed(0) : 0}%`}
           sub={`of ${totalEntries} total entries`}
           gradient="bg-gradient-to-br from-blue-400 to-indigo-500"
           delay={200}
+        />
+        <StatCard
+          icon="🏛️"
+          label="Team Expenses"
+          value={formatINR(totalExpenses)}
+          sub="across everyone"
+          gradient="bg-gradient-to-br from-purple-400 to-fuchsia-500"
+          delay={250}
         />
       </div>
 
@@ -162,50 +242,66 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Recent Entries */}
+      {/* Recent Activity */}
       <div className="fade-up" style={{ animationDelay: '400ms' }}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-extrabold text-gray-900 text-lg" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Recent Entries</h3>
+          <h3 className="font-extrabold text-gray-900 text-lg" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>Recent Activity</h3>
           <span className="text-xs bg-white/60 backdrop-blur px-2.5 py-1 rounded-full text-gray-500 font-medium flex items-center gap-1">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
             Live
           </span>
         </div>
 
-        {recentEntries.length === 0 ? (
+        {activity.length === 0 ? (
           <div className="glass-card rounded-3xl p-10 text-center">
             <div className="text-5xl mb-3 float">🪔</div>
-            <p className="text-gray-400 font-medium">No entries yet</p>
+            <p className="text-gray-400 font-medium">No activity yet</p>
             <p className="text-sm text-gray-400/70 mt-1">Add your first collection to get started!</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {recentEntries.map((entry, i) => {
-              const style = paymentStyles[entry.paymentMethod] || paymentStyles.other;
+            {activity.map((item, i) => {
+              const isIncome = item.type === 'income';
+              const isExpense = item.type === 'expense';
+              const style = isIncome ? (paymentStyles[item.method] || paymentStyles.other) : null;
+
               return (
                 <div
-                  key={entry.id}
+                  key={item.id}
                   className="glass-card rounded-3xl p-4 flex items-center gap-3.5 card-3d fade-up"
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
-                  <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/20">
-                    <span className="text-white font-extrabold text-lg" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
-                      {entry.name?.charAt(0).toUpperCase()}
-                    </span>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
+                    isIncome ? 'gradient-primary shadow-orange-500/20' : isExpense ? 'gradient-rose shadow-rose-500/20' : 'gradient-royal shadow-indigo-500/20'
+                  }`}>
+                    {isIncome ? (
+                      <span className="text-white font-extrabold text-lg" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
+                        {item.title?.charAt(0).toUpperCase()}
+                      </span>
+                    ) : (
+                      <span className="text-white text-lg">{isExpense ? '🧾' : '🔄'}</span>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 truncate">{entry.name}</p>
+                    <p className="font-bold text-gray-900 truncate">{item.title}</p>
                     <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
-                      <span className="font-medium text-gray-500">{entry.collectorName}</span>
-                      <span>•</span>
-                      <span>{entry.date}</span>
+                      {item.sub && <span className="font-medium text-gray-500 truncate">{item.sub}</span>}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-extrabold text-gray-900" style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>{formatINR(entry.amount)}</p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 inline-block border ${style.color}`}>
-                      {style.icon} {entry.paymentMethod === 'other' ? 'Other' : entry.paymentMethod.charAt(0).toUpperCase() + entry.paymentMethod.slice(1)}
-                    </span>
+                    <p className={`font-extrabold ${isExpense ? 'text-rose-600' : isIncome ? 'text-gray-900' : 'text-indigo-600'}`} style={{fontFamily: "'Plus Jakarta Sans', sans-serif"}}>
+                      {isExpense ? '-' : isIncome ? '' : ''}{formatINR(item.amount)}
+                    </p>
+                    {isIncome && style && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 inline-block border ${style.color}`}>
+                        {style.icon}
+                      </span>
+                    )}
+                    {!isIncome && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold mt-1 inline-block border ${isExpense ? 'bg-rose-500/10 border-rose-500/20 text-rose-600' : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-600'}`}>
+                        {isExpense ? 'Expense' : 'Transfer'}
+                      </span>
+                    )}
                   </div>
                 </div>
               );
