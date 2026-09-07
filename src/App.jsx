@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import EntryForm from './pages/EntryForm';
 import Collections from './pages/Collections';
 import UserManagement from './pages/UserManagement';
+import PublicLedger from './pages/PublicLedger';
 import Header from './components/Header';
 import { Toaster } from 'react-hot-toast';
 
@@ -59,8 +61,8 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Toaster 
+    <HashRouter>
+      <Toaster
         position="top-center"
         toastOptions={{
           duration: 2000,
@@ -75,7 +77,20 @@ export default function App() {
           },
         }}
       />
-      <AppContent />
-    </AuthProvider>
+      <Routes>
+        {/* Public, read-only, no login required - safe to share with anyone.
+            Deliberately outside AuthProvider so it never touches the users
+            collection (which holds login PINs). */}
+        <Route path="/public" element={<PublicLedger />} />
+        <Route
+          path="/*"
+          element={
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          }
+        />
+      </Routes>
+    </HashRouter>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { friendlyError } from '../utils/errors';
+import { formatINR, toMillis, formatDateTime as formatCapturedAt } from '../utils/format';
 import toast from 'react-hot-toast';
 
 const paymentStyles = {
@@ -10,19 +11,6 @@ const paymentStyles = {
   paytm: { color: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-600', icon: '⚡', label: 'Paytm' },
   other: { color: 'bg-gray-500/10 border-gray-500/20 text-gray-600', icon: '💰', label: 'Other' },
 };
-
-const formatINR = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
-
-function toMillis(ts) {
-  if (!ts) return 0;
-  return ts.seconds ? ts.seconds * 1000 : new Date(ts).getTime();
-}
-
-function formatCapturedAt(ts) {
-  const ms = toMillis(ts);
-  if (!ms) return '';
-  return new Date(ms).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
-}
 
 function formatSpendWhen(date, time) {
   if (!date) return '';

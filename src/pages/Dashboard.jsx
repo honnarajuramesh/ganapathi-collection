@@ -1,4 +1,5 @@
 import { useAuth } from '../contexts/AuthContext';
+import { formatINR, toMillis } from '../utils/format';
 
 const paymentStyles = {
   cash: { color: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600', icon: '💵' },
@@ -7,13 +8,6 @@ const paymentStyles = {
   paytm: { color: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-600', icon: '⚡', },
   other: { color: 'bg-gray-500/10 border-gray-500/20 text-gray-600', icon: '💰' },
 };
-
-const formatINR = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
-
-function toMillis(ts) {
-  if (!ts) return 0;
-  return ts.seconds ? ts.seconds * 1000 : new Date(ts).getTime();
-}
 
 function StatCard({ icon, label, value, sub, gradient, delay }) {
   return (

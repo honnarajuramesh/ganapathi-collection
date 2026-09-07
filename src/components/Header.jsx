@@ -38,6 +38,21 @@ export default function Header({ activePage, onNavigate }) {
             <div className="w-9 h-9 bg-white/80 border border-white/50 rounded-full flex items-center justify-center text-sm font-bold text-orange-600 shadow-sm">
               {currentUser?.name?.charAt(0)}
             </div>
+            <a
+              href="#/public"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 bg-white/80 border border-white/50 rounded-full flex items-center justify-center text-gray-400 hover:text-orange-500 hover:bg-orange-50 transition-all duration-200"
+              title="Share public ledger"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3"/>
+                <circle cx="6" cy="12" r="3"/>
+                <circle cx="18" cy="19" r="3"/>
+                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>
+                <line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/>
+              </svg>
+            </a>
             <button
               onClick={logout}
               className="w-9 h-9 bg-white/80 border border-white/50 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200"
